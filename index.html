@@ -1,14 +1,124 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>BT Lab - التحاليل</title>
+  <title>BT Lab Firebase</title>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 40px;
+    }
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #4a148c;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+    }
+    .checkbox {
+      margin-top: 15px;
+    }
+    button {
+      background-color: #4caf50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      margin-top: 20px;
+      cursor: pointer;
+      width: 100%;
+      border-radius: 5px;
+    }
+    #log {
+      margin-top: 20px;
+      padding: 10px;
+      background: #eee;
+      font-family: monospace;
+      white-space: pre-wrap;
+      border-radius: 5px;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
-  <h1>مرحبا بك في BT Lab</h1>
-  <ul>
-    <li><a href="acetaminophen.html">تحليل Acetaminophen</a></li>
-    <!-- أضف تحاليل أخرى هنا -->
-  </ul>
+  <div class="container">
+    <h1>📋 إضافة تحليل إلى Firebase</h1>
+    <label for="testName">اسم التحليل</label>
+    <input type="text" id="testName" placeholder="مثال: ALT">
+
+    <div class="checkbox">
+      <label><input type="checkbox" id="fast"> 🔬 تحليل سريع</label>
+      <label><input type="checkbox" id="lab"> 🧪 تحليل مختبري</label>
+      <label><input type="checkbox" id="delivery"> 🚚 خدمة نقل</label>
+      <label><input type="checkbox" id="setup"> ⚙️ إعداد خاص</label>
+    </div>
+
+    <button onclick="saveTest()">➕ حفظ التحليل</button>
+    <div id="log">⚠️ لم يتم تنفيذ أي إجراء بعد...</div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDhnePvRFg2AFPc09H1_RyS1Iq7tDdwIew",
+      authDomain: "bt-lab-system.firebaseapp.com",
+      projectId: "bt-lab-system",
+      storageBucket: "bt-lab-system.appspot.com",
+      messagingSenderId: "1086728580745",
+      appId: "1:1086728580745:web:57992949c60146ac25a058",
+      measurementId: "G-CCSWBQ2H5T",
+      databaseURL: "https://bt-lab-system-default-rtdb.firebaseio.com/"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const log = document.getElementById("log");
+
+    function saveTest() {
+      const name = document.getElementById("testName").value;
+      const fast = document.getElementById("fast").checked;
+      const lab = document.getElementById("lab").checked;
+      const delivery = document.getElementById("delivery").checked;
+      const setup = document.getElementById("setup").checked;
+
+      log.textContent = "📡 جاري إرسال البيانات إلى Firebase...";
+
+      if (!name.trim()) {
+        log.textContent = "⚠️ يرجى إدخال اسم التحليل أولاً.";
+        return;
+      }
+
+      const newRef = db.ref("tests").push();
+      newRef.set({
+        name, fast, lab, delivery, setup,
+        timestamp: new Date().toISOString()
+      }).then(() => {
+        log.textContent = "✅ تم الحفظ بنجاح!";
+        document.getElementById("testName").value = "";
+      }).catch(err => {
+        log.textContent = "❌ فشل الحفظ: " + err.message;
+        console.error(err);
+      });
+    }
+  </script>
 </body>
 </html>
